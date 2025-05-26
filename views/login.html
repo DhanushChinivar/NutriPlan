@@ -31,7 +31,7 @@
     <div id="login-form" class="form-container">
       <h2><span class="highlight">Welcome</span> Back!</h2>
       <p>Login to get started</p>
-      <form id="loginForm">
+      <form id="loginForm" onsubmit="return false;">
         <input type="email" name="email" placeholder="Enter your email" required>
         <input type="password" name="password" placeholder="Enter your password" required>
         <button type="submit">Login</button>
@@ -42,7 +42,7 @@
     <!-- REGISTER FORM -->
     <div id="register-form" class="form-container hidden">
       <h2>Register</h2>
-      <form id="registerForm">
+      <form id="registerForm" onsubmit="return false;">
         <input type="text" name="firstName" placeholder="Enter your first name" required>
         <input type="text" name="lastName" placeholder="Enter your last name" required>
         <input type="email" name="email" placeholder="Enter your email" required>
@@ -99,7 +99,7 @@
 
         localStorage.setItem("nutriplanEmail", body.email);
 
-        // ✅ Check if user already submitted preferences
+        // ✅ Check if user has filled info (age, weight, etc.)
         const infoRes = await fetch(`/api/user/get?email=${body.email}`);
         const userData = await infoRes.json();
 

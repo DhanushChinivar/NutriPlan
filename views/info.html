@@ -11,23 +11,33 @@
   <!-- 🔐 Preference Check & Redirect -->
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
-      const email = localStorage.getItem("nutriplanEmail");
-      if (!email) return window.location.href = "/login";
+  const email = localStorage.getItem("nutriplanEmail");
+  if (!email) return window.location.href = "/login";
 
-      try {
-        const res = await fetch(`/api/user/get?email=${email}`);
-        const data = await res.json();
-        if (res.ok && data.exists && !window.location.href.includes('update=true')) {
-          return window.location.href = "/dashboard";
-        }
-      } catch (err) {
-        console.error("Preference check error", err);
+  try {
+    const res = await fetch(`/api/user/get?email=${email}`);
+    const data = await res.json();
+
+    if (res.ok && data.exists) {
+      if (!window.location.href.includes('update=true')) {
+        return window.location.href = "/dashboard";
+      } else {
+        // 🧠 Jump to Step 3 directly if updating
+        currentStep = 2;
+        showStep(currentStep);
       }
-    });
+    }
+  } catch (err) {
+    console.error("Preference check error", err);
+  }
+});
   </script>
 
   <form id="infoForm" class="bg-white shadow-md rounded-lg p-8 max-w-xl w-full space-y-6">
     <h2 class="text-2xl font-semibold text-green-600">NutriPlan - Personal Info</h2>
+
+    <!-- Hidden field for test selector or Cypress -->
+    <input type="hidden" name="email" id="hiddenEmail" />
 
     <!-- Step 1: Basic Information -->
     <div class="step" id="step1">
@@ -171,7 +181,7 @@
       const email = localStorage.getItem("nutriplanEmail");
       if (!email) {
         alert("User email not found. Please login again.");
-        return window.location.href = "/login.html";
+        return window.location.href = "/login";
       }
       body.email = email;
 
