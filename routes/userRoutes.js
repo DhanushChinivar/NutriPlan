@@ -1,30 +1,18 @@
 const express = require('express');
+const { userPreferenceSchema } = require('../models/payloadValidation');
 const User = require('../models/user');
-const WeeklyMealPlan = require('../models/weeklyMealPlan'); // ✅ Import meal plan model
+const WeeklyMealPlan = require('../models/weeklyMealPlan');
 
 const router = express.Router();
 
-// ✅ Save user preferences
+//Save user preferences with Joi validation
 router.post('/save', async (req, res) => {
-  const {
-    email,
-    age,
-    height,
-    weight,
-    gender,
-    dietType,
-    allergies,
-    mealsPerDay,
-    goal,
-    activityLevel
-  } = req.body;
-
-  if (!email) return res.status(400).json({ message: 'Email is required' });
-
   try {
+    const { error, value } = userPreferenceSchema.validate(req.body);
+    if (error) return res.status(400).json({ message: 'Validation error', details: error.details });
+    const { email, age, height, weight, gender, dietType, allergies, mealsPerDay, goal, activityLevel } = value;
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: 'User not found' });
-
     // Update preference fields
     user.age = age;
     user.height = height;
@@ -61,7 +49,6 @@ router.get('/get', async (req, res) => {
       user.dietType && user.mealsPerDay && user.goal && user.activityLevel
     );
 
-    // ✅ Get latest weekly meal plan for the user
     const plan = await WeeklyMealPlan.findOne({ userEmail: email })
       .sort({ createdAt: -1 })
       .lean();
@@ -69,7 +56,7 @@ router.get('/get', async (req, res) => {
     res.json({
       exists: !!hasPreferences,
       user,
-      plan  // ✅ Now frontend can access data.plan.dailyPlans
+      plan
     });
   } catch (err) {
     console.error('Error checking user or fetching plan:', err);

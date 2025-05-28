@@ -1,6 +1,7 @@
 const Meal = require('../models/meals');
 const User = require('../models/user');
 const WeeklyMealPlan = require('../models/weeklyMealPlan');
+const { generateMealSchema } = require("../models/payloadValidation");
 const { calculateBMR, adjustCalories } = require('../utils/calculation');
 
 function sumNutrients(meals) {
@@ -88,7 +89,10 @@ async function createWeeklyPlan(user, excludeMealIds = [], daysCount = 7) {
 
 exports.generateMealPlan = async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.email }).exec();
+    const { error, value } = generateMealSchema.validate(req.body);
+    if (error) return res.status(400).json({ message: 'Validation error', details: error.details });
+    const { emailID } = value;
+    const user = await User.findOne({ email: emailID }).exec();
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const { weeklyPlan, targetCalories } = await createWeeklyPlan(user);

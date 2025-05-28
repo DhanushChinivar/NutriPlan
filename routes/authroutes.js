@@ -2,13 +2,16 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
 const User = require('../models/user');
+const { registerSchema } = require("../models/payloadValidation");
 const router = express.Router();
 
 // Register
 router.post('/register', async (req, res) => {
   try {
     console.log(req.body);
-    const { password, email, firstName, lastName } = req.body;
+    const { error, value } = registerSchema.validate(req.body);
+    if (error) return res.status(400).json({ message: 'Validation error', details: error.details });
+    const { password, email, firstName, lastName } = value;
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ firstName, lastName, email, password: hashedPassword });
     await user.save();
