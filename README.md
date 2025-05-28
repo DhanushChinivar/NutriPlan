@@ -1,3 +1,4 @@
+
 # NutriPlan – Meal Planning & Nutrition App
 
 ## Overview
@@ -37,12 +38,22 @@ Before running this project locally, ensure the following tools and technologies
    MONGO_URI=your_mongodb_connection_string
    ```
 
-4. **Start the server**
+4. **Seed the Database**
+
+   To populate the app with sample meals for testing:
+
+   ```bash
+   node seed.js
+   ```
+
+   This will insert a set of healthy meals with nutritional information into your MongoDB database, enabling the meal generation feature to work effectively during development and testing.
+
+5. **Start the server**
    ```bash
    node server.js
    ```
 
-5. **Access the application**
+6. **Access the application**
 
    Open your browser and navigate to: `http://localhost:3000`
 
@@ -60,6 +71,32 @@ Before running this project locally, ensure the following tools and technologies
 - **Password**: Minimum 8 characters, with at least one number and one special character
 - **Meal Preferences**: Required selection from available options
 - **Grocery List Items**: Must be generated from the meal plan or validated manually
+
+## Testing with Cypress
+
+We use [Cypress](https://www.cypress.io/) for automated end-to-end (E2E) testing.
+
+###  How to Run Cypress Tests
+
+1. Start the server:
+   ```bash
+   node server.js
+   ```
+
+2. Open the Cypress test runner:
+   ```bash
+   npx cypress open
+   ```
+
+3. Select a test from the Cypress UI to run.
+
+###  Test Files Overview
+
+- `account.cy.js` – Tests for login, logout, and user info updates  
+- `auth.cy.js` – Tests for user registration and login flow  
+- `user.cy.js` – Tests for submitting and validating user preferences  
+
+All test files are located inside the `cypress/e2e/` directory.
 
 ## Contributing
 
@@ -85,31 +122,33 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 
 BASE URL: http://localhost:3000/api
 
-
 ### Auth Routes
 
-1. User Registration : POST /auth/register
-
-Request Body:
+1. **User Registration**: POST /auth/register
+```json
 {
-    "password":"abc123",
-    "email":"suba@mail.com",
-    "firstName":"suba",
-    "lastName":"Thinakaran"
+    "password": "abc123",
+    "email": "suba@mail.com",
+    "firstName": "suba",
+    "lastName": "Thinakaran"
 }
-Response: 201
+```
+Response:
+```json
 {
     "message": "Registered successfully"
 }
+```
 
-2. User Login: POST /auth/login 
-
-Request Body:
+2. **User Login**: POST /auth/login
+```json
 {
-    "password":"abc123",
-    "email":"suba@mail.com"
+    "password": "abc123",
+    "email": "suba@mail.com"
 }
-Response: 201
+```
+Response:
+```json
 {
     "message": "Login successful",
     "user": {
@@ -121,10 +160,10 @@ Response: 201
         "__v": 0
     }
 }
+```
 
-3. Save User Preferences: POST /user/save
-
-Request Body:
+3. **Save User Preferences**: POST /user/save
+```json
 {
     "email": "suba@mail.com",
     "age": 25,
@@ -132,25 +171,27 @@ Request Body:
     "weight": 58,
     "gender": "female",
     "dietType": "vegetarian",
-    "allergies": [
-        "nuts"
-    ],
-    "mealsPerDay": ,
+    "allergies": ["nuts"],
+    "mealsPerDay": 3,
     "activityLevel": "low",
     "goal": "weight loss"
 }
-Response: 201
+```
+Response:
+```json
 {
     "message": "User updated successfully"
 }
+```
 
-4. Generate meal plan: POST /meals/generate
-
-Request Body:
+4. **Generate meal plan**: POST /meals/generate
+```json
 {
     "email": "suba@mail.com"
 }
-Response: 201
+```
+Response:
+```json
 {
     "mealPlan": [
         {
@@ -159,17 +200,10 @@ Response: 201
                 "fat": "14g",
                 "carbs": "70g"
             },
-            "_id": "68204234bb91841f6d557425",
             "name": "Tofu Veggie Bowl",
             "diet": "vegetarian",
             "calories": 820,
-            "ingredients": [
-                "tofu",
-                "broccoli",
-                "brown rice",
-                "carrots",
-                "soy sauce"
-            ],
+            "ingredients": ["tofu", "broccoli", "brown rice", "carrots", "soy sauce"],
             "instructions": "Cook brown rice. Stir-fry tofu and vegetables. Combine and drizzle with soy sauce."
         },
         {
@@ -178,20 +212,13 @@ Response: 201
                 "fat": "12g",
                 "carbs": "85g"
             },
-            "_id": "68204234bb91841f6d557426",
             "name": "Grilled Vegetable Quinoa Salad",
             "diet": "vegetarian",
             "calories": 740,
-            "ingredients": [
-                "quinoa",
-                "zucchini",
-                "bell peppers",
-                "olive oil",
-                "lemon juice"
-            ],
+            "ingredients": ["quinoa", "zucchini", "bell peppers", "olive oil", "lemon juice"],
             "instructions": "Grill vegetables. Cook quinoa. Toss all with olive oil and lemon juice."
         }
     ],
     "totalCalories": 1612.8
 }
-
+```

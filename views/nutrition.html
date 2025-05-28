@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nutrition - NutriPlan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+    <style>
+        /* Copy the same CSS styles you used in dashboard.html for sidebar and layout */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Open Sans', sans-serif;
+            background-color: #ffffff;
+            scroll-behavior: smooth;
+        }
+
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background-color: #e6f4d7;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: fixed;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-img {
+            width: 50px;
+            margin-bottom: 10px;
+        }
+
+        .user-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .user-avatar {
+            width: 60px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-nav {
+            width: 100%;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            text-decoration: none;
+            color: #333;
+            border-radius: 8px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .sidebar-nav a.active,
+        .sidebar-nav a:hover {
+            background-color: #87c440;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .sidebar-nav a.logout {
+            background-color: transparent;
+            color: #333;
+            border: 1px solid #ccc;
+            text-align: center;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        .sidebar-nav a.logout:hover {
+            background-color: #f8d7da;
+            color: #a94442;
+            border-color: #f5c6cb;
+        }
+
+        .main-content {
+            margin-left: 300px;
+            padding: 30px;
+            height: 100vh;
+            overflow-y: auto;
+            background-color: #ffffff;
+            width: calc(100% - 300px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #87c440;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input,
+        button {
+            padding: 8px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #87c440;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #87c440;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-weight: bold;
+            color: green;
+            text-align: center;
+        }
+
+        .chart-container {
+            max-width: 600px;
+            margin: 30px auto;
+        }
+
+        .chart-container canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+                width: calc(100% - 200px);
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="images/logo.png" alt="NutriPlan Logo" class="logo-img" />
+                <h2>NutriPlan</h2>
+            </div>
+            <div class="user-info">
+                <p>Hello! <span id="userName">User</span></p>
+                <small id="userEmail">user@email.com</small>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/nutrition" class="active">Nutrition</a>
+                <a href="grocerylist">Grocery List</a>
+                <a href="#">Profile</a>
+                <a href="/info?update=true">Update Preferences</a>
+                <a href="#" class="logout" onclick="logoutUser()">Log out</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+
+            <h1>Nutrition Tracker</h1>
+            <div class="chart-container">
+                <h2>Nutrition Summary</h2>
+                <canvas id="nutritionChart"></canvas>
+                <div id="noDataMessage" class="no-data-message" style="display: none;">No entries available. Please add
+                    some to see the chart.</div>
+            </div>
+
+            <h2>Add an entry</h2>
+            <div>
+                <form id="nutritionForm">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="date" required />
+
+                    <label for="foodItem">Food Item</label>
+                    <input type="text" id="foodItem" name="foodItem" placeholder="E.g., Apple" required />
+
+                    <label for="calories">Calories (kcal)</label>
+                    <input type="number" id="calories" name="calories" min="0" required />
+
+                    <label for="protein">Protein (grams)</label>
+                    <input type="number" id="protein" name="protein" min="0" required />
+
+                    <label for="carbs">Carbohydrates (grams)</label>
+                    <input type="number" id="carbs" name="carbs" min="0" required />
+
+                    <label for="fats">Fats (grams)</label>
+                    <input type="number" id="fats" name="fats" min="0" required />
+
+                    <button type="submit">Add Entry</button>
+                </form>
+                <div class="message" id="message"></div>
+            </div>
+
+        </main>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const form = document.getElementById('nutritionForm');
+        const messageDiv = document.getElementById('message');
+        const noDataMessage = document.getElementById('noDataMessage');
+
+        function logoutUser() {
+            localStorage.removeItem("nutriplanEmail");
+            window.location.href = "/";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const storedEmail = localStorage.getItem("nutriplanEmail") || "user@email.com";
+            document.getElementById("userEmail").textContent = storedEmail;
+
+            const userName = storedEmail.split("@")[0];
+            document.getElementById("userName").textContent = userName.charAt(0).toUpperCase() + userName.slice(1);
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                messageDiv.textContent = '';
+
+                const formData = {
+                    date: form.date.value,
+                    foodItem: form.foodItem.value.trim(),
+                    calories: Number(form.calories.value),
+                    protein: Number(form.protein.value),
+                    carbs: Number(form.carbs.value),
+                    fats: Number(form.fats.value)
+                };
+
+                try {
+                    formData.email = storedEmail;
+                    const response = await fetch('/api/nutrition/save', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (response.ok) {
+                        messageDiv.textContent = 'Entry added successfully!';
+                        form.reset();
+                        await loadChartData();
+                    } else {
+                        messageDiv.textContent = 'Failed to add entry.';
+                    }
+                } catch (err) {
+                    messageDiv.textContent = 'Error: ' + err.message;
+                }
+            });
+
+            async function fetchNutritionEntries() {
+                try {
+                    const response = await fetch(`/api/nutrition/list?email=${storedEmail}`);
+                    if (!response.ok) throw new Error('Failed to fetch nutrition entries');
+                    return await response.json();
+                } catch (error) {
+                    console.error(error);
+                    return [];
+                }
+            }
+
+            function renderChart(entries) {
+                const ctx = document.getElementById('nutritionChart').getContext('2d');
+
+                if (window.nutritionChart instanceof Chart) {
+                    window.nutritionChart.destroy();
+                }
+
+                if (!entries.length) {
+                    noDataMessage.style.display = 'block';
+                    window.nutritionChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: ['No Data'],
+                            datasets: [
+                                { label: 'Calories', data: [0], borderColor: '#87c440', fill: false },
+                                { label: 'Protein (g)', data: [0], borderColor: '#4caf50', fill: false },
+                                { label: 'Carbs (g)', data: [0], borderColor: '#fbc02d', fill: false },
+                                { label: 'Fats (g)', data: [0], borderColor: '#e64a19', fill: false }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: { legend: { position: 'top' } },
+                            scales: { y: { beginAtZero: true } }
+                        }
+                    });
+                    return;
+                }
+
+                noDataMessage.style.display = 'none';
+                entries.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                const dataByDate = {};
+                entries.forEach(entry => {
+                    const dateKey = new Date(entry.date).toLocaleDateString();
+                    if (!dataByDate[dateKey]) {
+                        dataByDate[dateKey] = { calories: 0, protein: 0, carbs: 0, fats: 0 };
+                    }
+                    dataByDate[dateKey].calories += entry.calories;
+                    dataByDate[dateKey].protein += entry.protein;
+                    dataByDate[dateKey].carbs += entry.carbs;
+                    dataByDate[dateKey].fats += entry.fats;
+                });
+
+                const labels = Object.keys(dataByDate);
+                const calories = labels.map(date => dataByDate[date].calories);
+                const protein = labels.map(date => dataByDate[date].protein);
+                const carbs = labels.map(date => dataByDate[date].carbs);
+                const fats = labels.map(date => dataByDate[date].fats);
+
+                window.nutritionChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [
+                            { label: 'Calories', data: calories, borderColor: '#87c440', fill: false, tension: 0.2 },
+                            { label: 'Protein (g)', data: protein, borderColor: '#4caf50', fill: false, tension: 0.2 },
+                            { label: 'Carbs (g)', data: carbs, borderColor: '#fbc02d', fill: false, tension: 0.2 },
+                            { label: 'Fats (g)', data: fats, borderColor: '#e64a19', fill: false, tension: 0.2 }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: { legend: { position: 'top' } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
+
+            async function loadChartData() {
+                const entries = await fetchNutritionEntries();
+                renderChart(entries);
+            }
+
+            loadChartData();
+        });
+    </script>
+</body>
+
+</html>

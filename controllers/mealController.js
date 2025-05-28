@@ -132,3 +132,27 @@ exports.regenerateMealPlan = async (req, res) => {
     res.status(500).json({ message: 'Failed to regenerate meal plan', error: error.message });
   }
 };
+
+exports.getWeeklyPlan = async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) return res.status(400).json({ message: "Email query parameter is required" });
+
+    // Find the latest saved weekly meal plan for this user
+    const plan = await WeeklyMealPlan.findOne({ userEmail: email }).sort({ createdAt: -1 }).exec();
+
+    if (!plan) {
+      return res.status(404).json({ message: "No meal plan found for this user" });
+    }
+
+    res.json({
+      message: "Weekly meal plan retrieved successfully",
+      weeklyMealPlan: plan,
+      exists: true
+    });
+  } catch (error) {
+    console.error("Error retrieving weekly meal plan:", error);
+    res.status(500).json({ message: "Failed to retrieve meal plan", error: error.message });
+  }
+};
+

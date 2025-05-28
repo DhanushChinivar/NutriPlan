@@ -4,8 +4,8 @@ const PDFDocument = require('pdfkit');
 const WeeklyMealPlan = require('../models/weeklyMealPlan');
 
 // GET /api/mealplan/export?email=user@example.com
-router.post('/export', async (req, res) => {
-  const userEmail = req.body.email;
+router.get('/export', async (req, res) => {
+  const userEmail = req.query.email;
 
   if (!userEmail) {
     return res.status(400).json({ error: 'Email is required' });

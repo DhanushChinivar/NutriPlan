@@ -34,4 +34,22 @@ describe('NutriPlan - Meal Plan Generation', () => {
     cy.get('#generateBtn').click();
     cy.get('#mealPlanContainer').should('exist').and('not.be.empty');
   });
+
+  it('should trigger export and download PDF', () => {
+  loginViaUI();
+
+  cy.intercept('GET', '/api/mealplan/export*').as('exportRequest');
+
+  cy.visit('/dashboard');
+
+  cy.get('#exportPdfBtn').should('be.visible').click();
+
+  cy.wait('@exportRequest', { timeout: 10000 }).then((interception) => {
+    expect(interception.response.statusCode).to.eq(200);
+    expect(interception.response.headers['content-type']).to.include('application/pdf');
+    cy.log('PDF export triggered and intercepted successfully.');
+  });
+});
+
+
 });
