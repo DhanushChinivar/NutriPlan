@@ -37,4 +37,23 @@ describe('Grocery List Page', () => {
     });
   });
 
+  it('exports the grocery list as PDF', () => {
+    // Intercept the PDF export request
+    cy.intercept('GET', '/api/grocery-list/pdf*').as('exportPDF');
+
+    // Click the export button
+    cy.get('.export-button')
+      .should('be.visible')
+      .and('contain', 'Export Grocery List')
+      .click();
+
+    // Wait for the backend to be called
+    cy.wait('@exportPDF').then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+      expect(interception.request.url).to.include('/api/grocery-list/pdf');
+    });
+
+    // Ensure no error message is displayed
+    cy.get('#errorMsg').should('not.contain', 'User not logged in.');
+  });
 });
