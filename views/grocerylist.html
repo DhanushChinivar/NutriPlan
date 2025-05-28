@@ -159,6 +159,29 @@
       margin-top: 40px;
     }
 
+    .export-button {
+      display: block;
+      margin: 40px auto;
+      padding: 12px 24px;
+      background-color: #a5d6a7;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .export-button:hover {
+      background-color: #81c784;
+      transform: translateY(-2px);
+    }
+
+    .export-button:active {
+      transform: translateY(0);
+    }
+
     @media (max-width: 768px) {
       .sidebar {
         width: 200px;
@@ -218,6 +241,7 @@
           <ul id="fiber-list"></ul>
         </div>
       </div>
+      <button class="export-button" onclick="exportGroceryList()">Export Grocery List</button>
       <div class="error" id="errorMsg"></div>
     </main>
   </div>
@@ -227,6 +251,35 @@
       localStorage.removeItem("nutriplanEmail");
       localStorage.removeItem("planGenerated");
       window.location.href = "/";
+    }
+
+    async function exportGroceryList() {
+      const email = localStorage.getItem("nutriplanEmail");
+      if (!email) {
+        document.getElementById("errorMsg").textContent = "User not logged in.";
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/grocery-list/pdf?email=${email}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to generate PDF");
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `grocery-list-${email}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } catch (err) {
+        document.getElementById("errorMsg").textContent = err.message;
+        console.error("Error exporting grocery list:", err);
+      }
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
